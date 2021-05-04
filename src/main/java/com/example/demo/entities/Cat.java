@@ -1,11 +1,21 @@
 package com.example.demo.entities;
 
+import javax.persistence.*;
 import java.util.Objects;
 
+@Entity
 public class Cat {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "path", nullable = false)
     private String path;
+
+    @Column(name = "rating", nullable = false)
     private int rating;
 
     public Cat() {
