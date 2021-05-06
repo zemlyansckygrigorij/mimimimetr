@@ -6,16 +6,15 @@ import java.util.Objects;
 @Entity
 public class Cat {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private long cId;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "path", nullable = false)
+    @Column(name = "path")
     private String path;
 
-    @Column(name = "rating", nullable = false)
+    @Column(name = "rating")
     private int rating;
 
     public Cat() {
@@ -26,20 +25,20 @@ public class Cat {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Cat cat = (Cat) o;
-        return id == cat.id && rating == cat.rating && name.equals(cat.name) && path.equals(cat.path);
+        return cId == cat.cId && rating == cat.rating && name.equals(cat.name) && path.equals(cat.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, path, rating);
+        return Objects.hash(cId, name, path, rating);
     }
 
-    public int getId() {
-        return id;
+    public long getId() {
+        return cId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(long id) {
+        this.cId = id;
     }
 
     public String getName() {
