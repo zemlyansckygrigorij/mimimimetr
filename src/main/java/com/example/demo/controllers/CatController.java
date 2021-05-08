@@ -2,12 +2,14 @@ package com.example.demo.controllers;
 
 import com.example.demo.entities.Cat;
 import com.example.demo.entities.Pair;
+import com.example.demo.entities.User;
 import com.example.demo.repositories.CatRepository;
+import com.example.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,11 @@ import static java.util.Comparator.comparing;
 public class CatController {
     @Autowired
     private final CatRepository repository;
+
+    @Autowired
+    private final UserRepository userRepository;
+    ArrayList<Cat> listCat;
+
     List<Pair> pairList = new ArrayList<>();
     private String[] arrayCats= new String[] {
             "https://raw.githubusercontent.com/zemlyansckygrigorij/mimimimetr/master/src/main/resources/pictures/Alfie.jpg",
@@ -56,10 +63,14 @@ public class CatController {
             "https://raw.githubusercontent.com/zemlyansckygrigorij/mimimimetr/master/src/main/resources/pictures/Susi.jpg",
             "https://raw.githubusercontent.com/zemlyansckygrigorij/mimimimetr/master/src/main/resources/pictures/Tiger.jpg"
     };
-    public CatController(CatRepository repository/*, PairRepository pairRepository*/) throws Exception {
+    @Autowired
+    public CatController(CatRepository repository, UserRepository userRepository) throws Exception {
+
         this.repository = repository;
+        this.userRepository = userRepository;
+
         int i =0;
-        ArrayList<Cat> listCat = new ArrayList<Cat>();
+        listCat = new ArrayList<>();
         for(String string:arrayCats){
             Cat cat = new Cat();
             i++;
@@ -73,7 +84,6 @@ public class CatController {
             repository.save(cat);
             listCat.add(cat);
         }
-
         while(listCat.size()>1){
             Pair pair = new Pair();
             int random = getRandomInt();
@@ -86,48 +96,52 @@ public class CatController {
             }
             pairList.add(pair);
         }
-
     }
 
     @GetMapping("/pairs/{id}")
     public  String  findPairById(@PathVariable int id,Model model)throws Exception {
-          if(id>pairList.size()-1) throw new Exception();
+        User currentUser = userRepository.getUserByUsername(SecurityContextHolder.getContext()
+                .getAuthentication().getName());
+
+        if(id>pairList.size()-1) throw new Exception();
           Pair pair = pairList.get(id);
+
           model.addAttribute("firstCat", pair.getFirstCat());
           model.addAttribute("secondCat", pair.getSecondCat());
+          model.addAttribute("voted", currentUser.isVoted());
+
+          if(currentUser.isVoted())return "hello";
           if(id<pairList.size()-1){
               model.addAttribute("id", id+1);
           }else{
               model.addAttribute("id", 1);
           }
           return "index";
-
     }
 
     @GetMapping("/pairs/result")
-    public  String  resultCats(Model model)throws Exception {
+    public  String  resultCats(Model model) {
 
-        List<Cat> listCats = (List<Cat>) repository.findAll();
+        User currentUser = userRepository.getUserByUsername(SecurityContextHolder.getContext()
+                .getAuthentication().getName());
+        currentUser.setVoted(true);
+
+        List<Cat> listCats = repository.findAll();
         List<Cat> sendCats = listCats.stream()
                 .sorted(comparing(Cat::getRating).reversed())
                 .limit(10)
                 .collect(Collectors.toList());
         model.addAttribute("cats", sendCats);
-        for(Cat cat:sendCats){
-            System.out.println("cat.getId() - "+ cat.getId());
-            System.out.println("cat.getName() - "+ cat.getName());
-            System.out.println("cat.getPath() - "+ cat.getPath());
-            System.out.println("catt.getRating() - "+ cat.getRating());
-        }
+
         return "result";
-
     }
-
-
+    @RequestMapping("/")
+    public String getPage() {
+        return "redirect:/pairs/1";
+    }
 
     @RequestMapping(value="/pairs/{id}", method=RequestMethod.POST)
     public String greetingSubmit(@RequestParam(value = "cid", required = false) Integer cid,@PathVariable int id,@ModelAttribute Cat cat, Model model) {
-        System.out.println("cid - "+ cid);
 
         if(repository.findById((long)cid).isPresent()){
             Cat catById = repository.findById((long)cid).get();
