@@ -34,8 +34,6 @@ class CatRepositoryTest {
         long count = repository.count();
         assertEquals(1, count);
 
-      // assertThat(books).extracting(Book::getName).containsOnly("C++");
-
     }
 
 }
