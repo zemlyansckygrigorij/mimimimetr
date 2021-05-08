@@ -19,8 +19,8 @@ class UsersController {
         for(int i =0;i<10;i++){
             User user = new User();
             user.setUserId(i);
-            user.setName("user"+1);
-            user.setPassword(encoder.encode("password"+1));
+            user.setName("user"+i);
+            user.setPassword(encoder.encode("password"+i));
             user.setRole("ROLE_USER");
             user.setEnabled(true);
             user.setVoted(false);
