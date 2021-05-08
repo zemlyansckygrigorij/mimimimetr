@@ -3,7 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.entities.Cat;
 import com.example.demo.entities.Pair;
 import com.example.demo.entities.User;
-import com.example.demo.repositories.CatRepository;
+import com.example.demo.repository.CatRepository;
 import com.example.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
