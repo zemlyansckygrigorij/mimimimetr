@@ -25,9 +25,9 @@ public class CatController {
 
     @Autowired
     private final UserRepository userRepository;
-    ArrayList<Cat> listCat;
-
+    List<Cat> listCat;
     List<Pair> pairList = new ArrayList<>();
+
     private String[] arrayCats= new String[] {
             "https://raw.githubusercontent.com/zemlyansckygrigorij/mimimimetr/master/src/main/resources/pictures/Alfie.jpg",
             "https://raw.githubusercontent.com/zemlyansckygrigorij/mimimimetr/master/src/main/resources/pictures/Angel.jpg",
@@ -85,41 +85,29 @@ public class CatController {
             int finish =  string.lastIndexOf(".");
             cat.setName(string.substring(start+1,finish));
             repository.save(cat);
-            listCat.add(cat);
         }
-        while(listCat.size()>1){
-            Pair pair = new Pair();
-            int random = getRandomInt();
-            if(random<listCat.size()){
-                pair.setFirstCat( listCat.remove(random));
-                pair.setSecondCat( listCat.remove(0));
-            }else{
-                pair.setFirstCat( listCat.remove(1));
-                pair.setSecondCat( listCat.remove(0));
-            }
-            pairList.add(pair);
-        }
+        setPairList();
     }
 
     @GetMapping("/pairs/{id}")
     public  String  findPairById(@PathVariable int id,Model model)throws Exception {
         User currentUser = userRepository.getUserByUsername(SecurityContextHolder.getContext()
                 .getAuthentication().getName());
-
         if(id>pairList.size()-1) throw new Exception();
-          Pair pair = pairList.get(id);
+        Pair pair = pairList.get(id);
 
-          model.addAttribute("firstCat", pair.getFirstCat());
-          model.addAttribute("secondCat", pair.getSecondCat());
-          model.addAttribute("voted", currentUser.isVoted());
+        model.addAttribute("firstCat", pair.getFirstCat());
+        model.addAttribute("secondCat", pair.getSecondCat());
+        model.addAttribute("voted", currentUser.isVoted());
 
-          if(currentUser.isVoted())return "hello";
-          if(id<pairList.size()-1){
-              model.addAttribute("id", id+1);
-          }else{
-              model.addAttribute("id", 1);
-          }
-          return "index";
+        if(currentUser.isVoted())return "hello";
+
+        if(id<pairList.size()-1){
+            model.addAttribute("id", id+1);
+        }else{
+            model.addAttribute("id", 1);
+        }
+        return "index";
     }
 
     @GetMapping("/pairs/result")
@@ -128,6 +116,7 @@ public class CatController {
         User currentUser = userRepository.getUserByUsername(SecurityContextHolder.getContext()
                 .getAuthentication().getName());
         currentUser.setVoted(true);
+        userRepository.save(currentUser);
 
         List<Cat> listCats = repository.findAll();
         List<Cat> sendCats = listCats.stream()
@@ -168,5 +157,22 @@ public class CatController {
     private int getRandomInt(){
         Random random = new Random();
         return  random.nextInt(5);
+    }
+
+    public void setPairList() throws Exception {
+        listCat  = repository.findAll();
+        if(pairList.size()>0)pairList.removeAll(pairList);
+        while(listCat.size()>1){
+            Pair pair = new Pair();
+            int random = getRandomInt();
+            if(random<listCat.size()){
+                pair.setFirstCat( listCat.remove(random));
+                pair.setSecondCat( listCat.remove(0));
+            }else{
+                pair.setFirstCat( listCat.remove(1));
+                pair.setSecondCat( listCat.remove(0));
+            }
+            pairList.add(pair);
+        }
     }
 }
