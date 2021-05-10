@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 
 
+
 @Controller
 class UsersController {
 
@@ -16,7 +17,7 @@ class UsersController {
     public UsersController(UserRepository repository) {
         this.repository = repository;
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        for(int i =0;i<10;i++){
+        for(int i =1;i<10;i++){
             User user = new User();
             user.setUserId(i);
             user.setName("user"+i);
@@ -27,7 +28,7 @@ class UsersController {
             repository.save(user);
         }
         User user = new User();
-        user.setUserId(1);
+        user.setUserId(0);
         user.setName("namhm");
         user.setPassword("$2a$10$XptfskLsT1l/bRTLRiiCgejHqOpgXFreUnNUa35gJdCr2v2QbVFzu");
         user.setEnabled(true);
@@ -35,5 +36,4 @@ class UsersController {
         user.setRole("ROLE_USER");
         repository.save(user);
     }
-
 }
